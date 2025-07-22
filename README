@@ -1,0 +1,11 @@
+## AI Assistant for job hunting
+
+### 1. Setup
+```
+conda create -n hjh python=3.11
+conda activate hjh
+pip install -r requirements.txt  
+```
+
+
+
