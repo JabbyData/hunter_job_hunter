@@ -25,7 +25,11 @@ def main():
         expected_output
     """
     # Function implementation
-    generate_web_interface()
+    uploaded_pdf = generate_web_interface()
+    if uploaded_pdf is not None:
+        print(uploaded_pdf.name)
+        print(type(uploaded_pdf))
+
 
 
 if __name__ == "__main__":
