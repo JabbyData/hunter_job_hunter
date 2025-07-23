@@ -3,7 +3,7 @@ Main module to run interface
 """
 
 from tools.web_interface import generate_web_interface
-
+from tools.pdf_extractor import extract_text
 
 def main():
     """
@@ -27,10 +27,8 @@ def main():
     # Function implementation
     uploaded_pdf = generate_web_interface()
     if uploaded_pdf is not None:
-        print(uploaded_pdf.name)
-        print(type(uploaded_pdf))
-
-
+        text = extract_text(uploaded_pdf)
+        print(f"extracted text {type(text)}: \n {text}")
 
 if __name__ == "__main__":
     main()
