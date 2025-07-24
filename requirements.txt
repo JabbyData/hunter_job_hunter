@@ -1,2 +1,6 @@
 streamlit
 pdfminer.six
+langchain_core
+langchain-huggingface
+transformers
+torch

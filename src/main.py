@@ -2,8 +2,11 @@
 Main module to run interface
 """
 
-from tools.web_interface import generate_web_interface
+import os
+from tools.web_interface import generate_web_interface, display_api_box
 from tools.pdf_extractor import extract_text
+from agent.langchain import extract_profile
+
 
 def main():
     """
@@ -26,9 +29,15 @@ def main():
     """
     # Function implementation
     uploaded_pdf = generate_web_interface()
+
     if uploaded_pdf is not None:
         text = extract_text(uploaded_pdf)
-        print(f"extracted text {type(text)}: \n {text}")
+        hf_api_key = display_api_box()
+
+        if len(hf_api_key) != 0:
+            profile_analysis = extract_profile(hf_api_key=hf_api_key, text_resume=text)
+            print(profile_analysis)
+
 
 if __name__ == "__main__":
     main()
