@@ -64,7 +64,12 @@ def extract_experience(llm: HuggingFacePipeline, text_resume: str):
     INSTRUCTIONS:
     - Extract ALL experience entries from the resume
     - For each experience entry, identify: company name, position occupied, description (key-words) and dates
-    - If dates are missing from experience section, check other sections for timeline context
+    - CRITICAL DATE RULE : do not treat dates BEFORE the first experience description
+    - For a particular experience, dates appear AFTER the experience description
+    - If there are missing dates right after experience description, check the next sections AFTER the experience section to find them
+    - CRITICAL DATE RULE: When assigning dates, ensure each subsequent experience entry has start_date and end_date that are chronologically OLDER than or EQUAL to the previous entry's start_date
+    - Example: If first entry starts in 2023, the next entry must end in 2023 or older
+    - When dates are unclear, use logical chronological ordering based on career progression
     - For description field: extract EXACTLY 10 keywords or fewer
     - Output ONLY a valid JSON string with no additional text or explanations
     - Use consistent formatting and avoid duplicates
@@ -108,8 +113,7 @@ def extract_projects(llm: HuggingFacePipeline, text_resume: str):
 
     INSTRUCTIONS:
     - Extract ALL project entries from the resume
-    - For each project entry, identify: project name, tools used, and dates
-    - If dates are missing from projects section, check other sections for timeline context
+    - For each project entry, identify: project name and tools used
     - Output ONLY a valid JSON string with no additional text or explanations
     - Use consistent formatting and avoid duplicates
     - No identation
@@ -120,8 +124,6 @@ def extract_projects(llm: HuggingFacePipeline, text_resume: str):
         {{
         "name": "Project name",
         "tools": "Technologies, tools, and frameworks used",
-        "start_date": "YYYY or YYYY-MM",
-        "end_date": "YYYY or YYYY-MM or 'Present'",
         }}
     ]
     }}
@@ -151,23 +153,24 @@ def extract_skills(llm: HuggingFacePipeline, text_resume: str):
     INSTRUCTIONS:
     - Extract ALL skills mentioned in the resume
     - Categorize skills into technical skills, soft skills, and languages
+    - Associate proficiency to skills
     - Identify soft skills by focusing on descriptions in the projects and experience sections
     - Output ONLY a valid JSON string with no additional text or explanations
     - Use consistent formatting and avoid duplicates
     - JSON format should be respected
-    - No identation
+    - No indentation
 
     OUTPUT FORMAT:
     {{
     "skills": [
         {{
-        "Technical": ["skill1", "skill2", "skill3"]
+        "Languages": ["language1/Beginner", "language2/Intermediate", "language3/Expert"]
         }},
         {{
-        "Soft Skills": ["skill1", "skill2", "skill3"]
+        "Technical": ["skill1/Beginner", "skill2/Intermediate", "skill3/Expert"]
         }},
         {{
-        "Languages": ["language1", "language2"]
+        "Soft Skills": ["skill1/Beginner", "skill2/Intermediate", "skill3/Expert"]
         }}
     ]
     }}
@@ -202,7 +205,6 @@ def parse_topic(topic, llm, text_resume, max_failure):
                 topic_analysis = extract_projects(llm, text_resume)
             elif topic == "skills":
                 topic_analysis = extract_skills(llm, text_resume)
-                print("skill analysis : \n", topic_analysis)
             else:
                 raise NotImplementedError(f"topic {topic} was not found !")
 
@@ -246,7 +248,8 @@ def extract_profile(hf_api_key: str, text_resume: str, max_failure: int = 10):
         )
 
         combined_profile = {}
-        topics = ["education", "experience", "projects", "skills"]
+        # topics = ["education", "experience", "projects", "skills"]
+        topics = ["experience"]
         progress_bar = st.progress(0)
         status_text = st.empty()
 

@@ -62,19 +62,14 @@ class Experience:
 
 
 class Project:
-    def __init__(self, name, duration, description, tools):
+    def __init__(self, name, description, tools):
         self._name = name
-        self._duration = duration
         self._description = description
         self._tools = tools
 
     @property
     def name(self):
         return self._name
-
-    @property
-    def duration(self):
-        return self._duration
 
     @property
     def description(self):

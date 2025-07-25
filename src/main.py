@@ -6,6 +6,7 @@ import os
 from tools.web_interface import generate_web_interface, display_api_box
 from tools.pdf_extractor import extract_text
 from agent.profile_extractor import extract_profile
+import json
 
 
 def main():
@@ -27,7 +28,6 @@ def main():
     >>> main(arg_1, arg_2, arg_n)
         expected_output
     """
-    # Function implementation
     uploaded_pdf = generate_web_interface()
 
     if uploaded_pdf is not None:
@@ -36,7 +36,10 @@ def main():
 
         if len(hf_api_key) != 0:
             profile_analysis = extract_profile(hf_api_key=hf_api_key, text_resume=text)
-            print(profile_analysis)
+
+            print("Profile extracted !")
+            with open("profile_analyse.json", "w") as fp:
+                json.dump(profile_analysis, fp)
 
 
 if __name__ == "__main__":
