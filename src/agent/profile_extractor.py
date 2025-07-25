@@ -8,6 +8,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 import json
+import streamlit as st
 
 
 def extract_education(llm: HuggingFacePipeline, text_resume: str):
@@ -150,8 +151,10 @@ def extract_skills(llm: HuggingFacePipeline, text_resume: str):
     INSTRUCTIONS:
     - Extract ALL skills mentioned in the resume
     - Categorize skills into technical skills, soft skills, and languages
+    - Identify soft skills by focusing on descriptions in the projects and experience sections
     - Output ONLY a valid JSON string with no additional text or explanations
     - Use consistent formatting and avoid duplicates
+    - JSON format should be respected
     - No identation
 
     OUTPUT FORMAT:
@@ -163,6 +166,7 @@ def extract_skills(llm: HuggingFacePipeline, text_resume: str):
         {{
         "Soft Skills": ["skill1", "skill2", "skill3"]
         }},
+        {{
         "Languages": ["language1", "language2"]
         }}
     ]
@@ -198,7 +202,7 @@ def parse_topic(topic, llm, text_resume, max_failure):
                 topic_analysis = extract_projects(llm, text_resume)
             elif topic == "skills":
                 topic_analysis = extract_skills(llm, text_resume)
-                print(topic_analysis)
+                print("skill analysis : \n", topic_analysis)
             else:
                 raise NotImplementedError(f"topic {topic} was not found !")
 
@@ -225,7 +229,7 @@ def parse_analysis(topic_analysis: str, topic: str):
     return topic_analysis[start_idx : end_idx + 2]
 
 
-def extract_profile(hf_api_key: str, text_resume: str, max_failure: int = 5):
+def extract_profile(hf_api_key: str, text_resume: str, max_failure: int = 10):
     try:
         print("Text to analyze \n", text_resume)
 
@@ -243,12 +247,19 @@ def extract_profile(hf_api_key: str, text_resume: str, max_failure: int = 5):
 
         combined_profile = {}
         topics = ["education", "experience", "projects", "skills"]
-        for topic in topics:
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+
+        for i, topic in enumerate(topics):
+            status_text.text(f"Extracting {topic}...")
             topic_analysis = parse_topic(topic, llm, text_resume, max_failure)
             combined_profile[topic] = topic_analysis[topic]
 
-        print("Profile extracted !")
+            progress = (i + 1) / len(topics)
+            progress_bar.progress(progress)
+
+        status_text.text("Profile extracted!")
         return combined_profile
 
     except Exception as e:
-        print(e)
+        st.text("⚠️ Profile extraction failed, please try again")

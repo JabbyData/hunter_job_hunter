@@ -49,7 +49,7 @@ def display_api_box():
     st.markdown("### 🔑 API Configuration")
 
     api_key = st.text_input(
-        "Please enter your API key:",
+        "Please enter your HugginFace API key:",
         type="password",
         placeholder="Enter your HugginFace API key here...",
         help="This key will be used to access external services",

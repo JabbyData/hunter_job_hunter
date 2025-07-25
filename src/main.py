@@ -5,7 +5,7 @@ Main module to run interface
 import os
 from tools.web_interface import generate_web_interface, display_api_box
 from tools.pdf_extractor import extract_text
-from agent.langchain import extract_profile
+from agent.profile_extractor import extract_profile
 
 
 def main():
