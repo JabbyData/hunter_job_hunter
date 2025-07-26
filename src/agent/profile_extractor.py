@@ -170,9 +170,9 @@ def extract_skills(llm: HuggingFacePipeline, text_resume: str):
 
 
 def parse_topic(topic, llm, text_resume, max_failure):
-    failing_c = 0
+    failure_c = 0
     topic_analysis = None
-    while failing_c < max_failure:
+    while failure_c < max_failure:
 
         try:
             if topic == "education":
@@ -193,14 +193,19 @@ def parse_topic(topic, llm, text_resume, max_failure):
             break
 
         except Exception as e:
-            failing_c += 1
-            print(f"Education extraction failed (attempt {failing_c}): {e}")
+            failure_c += 1
+            print(f"Education extraction failed (attempt {failure_c}): {e}")
 
     return topic_analysis
 
 
 def parse_analysis(topic_analysis: str, topic: str):
     topic_analysis = topic_analysis.strip()
+
+    if topic == "rec_job":
+        start_idx = topic_analysis.find("[")
+        end_idx = topic_analysis.find("]")
+
     if topic in topic_analysis:
         start_idx = topic_analysis.find("[{")
         end_idx = topic_analysis.find("]}")
@@ -226,7 +231,6 @@ def extract_profile(hf_api_key: str, text_resume: str, max_failure: int = 10):
 
         combined_profile = {}
         topics = ["education", "experience", "projects", "skills"]
-        # topics = ["skills"]
         progress_bar = st.progress(0)
         status_text = st.empty()
 
@@ -238,8 +242,64 @@ def extract_profile(hf_api_key: str, text_resume: str, max_failure: int = 10):
             progress = (i + 1) / len(topics)
             progress_bar.progress(progress)
 
-        status_text.text("Profile extracted!")
+        status_text.text("Recommending jobs ...")
+
+        st.subheader("Recommended Job Positions")
+        rec_analysis = recommend_job(combined_profile, llm)
+        rec_analysis = rec_analysis.strip("[]").split(",")
+        for job in rec_analysis:
+            job = job.strip().strip('"')
+            st.write(f"• {job}")
+
+        status_text.text("Profile analyzed !")
+
         return combined_profile
 
     except Exception as e:
-        st.text("⚠️ Profile extraction failed, please try again")
+        st.text("⚠️ Profile extraction failed, please try again.")
+        print(e)
+
+
+def recommend_job(
+    profile_description: str, llm: HuggingFacePipeline, max_failure: int = 10
+):
+    failure_c = 0
+    while failure_c < max_failure:
+        try:
+            print("Recommending job positions ...")
+
+            rec_prompt = PromptTemplate.from_template(
+                """You are a career advisor.
+
+            TASK: Find job positions related to the profile description.
+
+            IMPORTANT RULES:
+            1. Output a list of at most 10 relevant jobs based on the profile description
+            2. No additional text, comments, or explanations
+            3. No identation
+            4. Output ONLY the list
+
+            OUTPUT_FORMAT:
+            ["job1", "job2", ... , "job10"]
+
+            RESUME TEXT:
+            {profile_description}
+
+            OUTPUT:"""
+            )
+
+            out_parser = StrOutputParser()
+
+            rec_pipe = rec_prompt | llm | out_parser
+
+            rec_analysis = rec_pipe.invoke({"profile_description": profile_description})
+
+            rec_analysis = parse_analysis(rec_analysis, "rec_job")
+            return rec_analysis
+
+        except Exception as e:
+            failure_c += 1
+            print(f"Education extraction failed (attempt {failure_c}): {e}")
+
+    if failure_c == max_failure:
+        st.text("⚠️ Job recommendation failed, please try again.")

@@ -1,6 +1,7 @@
 streamlit
-pdfminer.six
+pymupdf
 langchain_core
 langchain-huggingface
 transformers
 torch
+selenium

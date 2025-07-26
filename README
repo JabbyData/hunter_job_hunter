@@ -5,5 +5,8 @@
 conda create -n hjh python=3.11
 conda activate hjh
 pip install -r requirements.txt
-pip install --upgrade pymupdf
 ```
+
+### 2. PDF profiling
+
+### 3. Websites parsing
