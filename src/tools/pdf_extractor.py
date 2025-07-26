@@ -3,6 +3,7 @@ Module related to pdf extraction and features preparation
 """
 
 from pdfminer.high_level import extract_text
+import fitz
 
 
 def extract_text_from_pdf(pdf_file) -> float:
@@ -25,5 +26,9 @@ def extract_text_from_pdf(pdf_file) -> float:
     """
     # Function implementation
     print("Extracting pdf text ...")
-    text = extract_text(pdf_file)
+    # text = extract_text(pdf_file) # pdfminer
+    doc = fitz.open(stream=pdf_file.read(), filetype="pdf")  # PyMuPDF
+    text = ""
+    for page in doc:
+        text += page.get_text()
     return text

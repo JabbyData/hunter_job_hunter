@@ -4,7 +4,7 @@ Main module to run interface
 
 import os
 from tools.web_interface import generate_web_interface, display_api_box
-from tools.pdf_extractor import extract_text
+from tools.pdf_extractor import extract_text_from_pdf
 from agent.profile_extractor import extract_profile
 import json
 
@@ -31,7 +31,7 @@ def main():
     uploaded_pdf = generate_web_interface()
 
     if uploaded_pdf is not None:
-        text = extract_text(uploaded_pdf)
+        text = extract_text_from_pdf(uploaded_pdf)
         hf_api_key = display_api_box()
 
         if len(hf_api_key) != 0:

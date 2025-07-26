@@ -20,7 +20,6 @@ def extract_education(llm: HuggingFacePipeline, text_resume: str):
     INSTRUCTIONS:
     - Extract ALL education entries from the resume
     - For each education entry, identify: institution name, degree level, field of study, and dates
-    - If dates are missing from education section, check other sections for timeline context
     - Output ONLY a valid JSON string with no additional text or explanations
     - Use consistent formatting and avoid duplicates
     - No identation
@@ -59,21 +58,16 @@ def extract_experience(llm: HuggingFacePipeline, text_resume: str):
     print("Extracting experience ...")
     exp_prompt = PromptTemplate.from_template(
         """
-    You are an expert resume parser. Extract experience information from the provided resume text.
+    You are an expert resume parser. Extract work experience information from the provided resume text.
 
     INSTRUCTIONS:
-    - Extract ALL experience entries from the resume
-    - For each experience entry, identify: company name, position occupied, description (key-words) and dates
-    - CRITICAL DATE RULE : do not treat dates BEFORE the first experience description
-    - For a particular experience, dates appear AFTER the experience description
-    - If there are missing dates right after experience description, check the next sections AFTER the experience section to find them
-    - CRITICAL DATE RULE: When assigning dates, ensure each subsequent experience entry has start_date and end_date that are chronologically OLDER than or EQUAL to the previous entry's start_date
-    - Example: If first entry starts in 2023, the next entry must end in 2023 or older
-    - When dates are unclear, use logical chronological ordering based on career progression
-    - For description field: extract EXACTLY 10 keywords or fewer
+    - Extract ALL professional experience entries from the resume
+    - For each experience entry, identify: company name, position, key responsibilities/achievements, and employment dates
+    - DESCRIPTION GUIDELINES:
+      * Extract 5-10 most relevant keywords describing responsibilities, achievements, or technologies used
     - Output ONLY a valid JSON string with no additional text or explanations
     - Use consistent formatting and avoid duplicates
-    - No identation
+    - No indentation
 
     OUTPUT FORMAT:
     {{
@@ -81,7 +75,7 @@ def extract_experience(llm: HuggingFacePipeline, text_resume: str):
         {{
         "company": "Company name",
         "position": "Job title/Position",
-        "description": "maximum 10 keywords about project description",
+        "description": "5-10 key responsibilities, achievements, or technologies",
         "start_date": "YYYY or YYYY-MM",
         "end_date": "YYYY or YYYY-MM or 'Present'",
         "location": "City, Country (if available)"
@@ -201,6 +195,7 @@ def parse_topic(topic, llm, text_resume, max_failure):
                 topic_analysis = extract_education(llm, text_resume)
             elif topic == "experience":
                 topic_analysis = extract_experience(llm, text_resume)
+                print("exp : \n", topic_analysis)
             elif topic == "projects":
                 topic_analysis = extract_projects(llm, text_resume)
             elif topic == "skills":
@@ -237,7 +232,7 @@ def extract_profile(hf_api_key: str, text_resume: str, max_failure: int = 10):
 
         print("Loading the analyser ...")
         login(hf_api_key)
-        model_id = "Qwen/Qwen3-4B"
+        model_id = "Qwen/Qwen3-8B"
         tokenizer = AutoTokenizer.from_pretrained(model_id)
         model = AutoModelForCausalLM.from_pretrained(model_id)
         pipe = pipeline(
