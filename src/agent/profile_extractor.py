@@ -14,35 +14,32 @@ import streamlit as st
 def extract_education(llm: HuggingFacePipeline, text_resume: str):
     print("Extracting education ...")
     educ_prompt = PromptTemplate.from_template(
-        """
-    You are an expert resume parser. Extract education information from the provided resume text.
+        """You are an expert resume parser.
 
-    INSTRUCTIONS:
-    - Extract ALL education entries from the resume
-    - For each education entry, identify: institution name, degree level, field of study, and dates
-    - Output ONLY a valid JSON string with no additional text or explanations
-    - Use consistent formatting and avoid duplicates
-    - No identation
+        TASK: Extract ALL education entries from the resume.
 
-    OUTPUT FORMAT:
-    {{
-    "education": [
-        {{
-        "institution": "University/School name",
-        "degree_level": "Bachelor's/Master's/PhD/Certificate/etc.",
-        "field_of_study": "Major/Field/Specialization",
-        "start_date": "YYYY or YYYY-MM",
-        "end_date": "YYYY or YYYY-MM or 'Present'",
-        "location": "City, Country (if available)"
-        }}
-    ]
-    }}
+        For each education entry, extract:
+        - Institution name
+        - Degree level
+        - Field of study
+        - Start date (format: YYYY-MM)
+        - End date (format: YYYY-MM or "Present" if current)
+        - Location (City, Country)
 
-    RESUME TEXT:
-    {text_resume}
+        IMPORTANT RULES:
+        1. Output ONLY valid JSON format
+        2. No additional text, comments, or explanations
+        3. Use exact field names as shown in the format
+        4. If information is missing, use empty string ""
+        5. No indentation or formatting
 
-    JSON OUTPUT:
-    """
+        OUTPUT FORMAT:
+        {{"education": [{{"institution": "University name", "degree_level": "Degree type", "field_of_study": "Major/Field", "start_date": "YYYY-MM", "end_date": "YYYY-MM or Present", "location": "City, Country"}}]}}
+
+        RESUME TEXT:
+        {text_resume}
+
+        JSON OUTPUT:"""
     )
 
     out_parser = StrOutputParser()
@@ -57,37 +54,34 @@ def extract_education(llm: HuggingFacePipeline, text_resume: str):
 def extract_experience(llm: HuggingFacePipeline, text_resume: str):
     print("Extracting experience ...")
     exp_prompt = PromptTemplate.from_template(
-        """
-    You are an expert resume parser. Extract work experience information from the provided resume text.
+        """You are an expert resume parser.
 
-    INSTRUCTIONS:
-    - Extract ALL professional experience entries from the resume
-    - For each experience entry, identify: company name, position, key responsibilities/achievements, and employment dates
-    - DESCRIPTION GUIDELINES:
-      * Extract 5-10 most relevant keywords describing responsibilities, achievements, or technologies used
-    - Output ONLY a valid JSON string with no additional text or explanations
-    - Use consistent formatting and avoid duplicates
-    - No indentation
+        TASK: Extract ALL professional work experience entries from the resume.
 
-    OUTPUT FORMAT:
-    {{
-    "experience": [
-        {{
-        "company": "Company name",
-        "position": "Job title/Position",
-        "description": "5-10 key responsibilities, achievements, or technologies",
-        "start_date": "YYYY or YYYY-MM",
-        "end_date": "YYYY or YYYY-MM or 'Present'",
-        "location": "City, Country (if available)"
-        }}
-    ]
-    }}
+        For each work experience entry, extract:
+        - Company name
+        - Job title/position
+        - Description: EXACTLY 5 keywords describing key responsibilities and technologies
+        - Start date (format: YYYY-MM)
+        - End date (format: YYYY-MM or "Present" if current)
+        - Location (City, Country)
 
-    RESUME TEXT:
-    {text_resume}
+        IMPORTANT RULES:
+        1. Output ONLY valid JSON format
+        2. No additional text, comments, or explanations
+        3. Use exact field names as shown in the format
+        4. Description must contain MAXIMUM 5 keywords separated by commas
+        5. Keywords should focus on: technologies, tools, responsibilities, achievements
+        6. If information is missing, use empty string ""
+        7. No indentation or formatting
 
-    JSON OUTPUT:
-    """
+        JSON FORMAT:
+        {{"experience": [{{"company": "Company name", "position": "Job title", "description": "keyword1, keyword2, keyword3, ...", "start_date": "YYYY-MM", "end_date": "YYYY-MM or Present", "location": "City, Country"}}]}}
+
+        RESUME TEXT:
+        {text_resume}
+
+        JSON OUTPUT:"""
     )
 
     out_parser = StrOutputParser()
@@ -102,31 +96,30 @@ def extract_experience(llm: HuggingFacePipeline, text_resume: str):
 def extract_projects(llm: HuggingFacePipeline, text_resume: str):
     print("Extracting projects ...")
     proj_prompt = PromptTemplate.from_template(
-        """
-    You are an expert resume parser. Extract project information from the provided resume text.
+        """You are an expert resume parser.
 
-    INSTRUCTIONS:
-    - Extract ALL project entries from the resume
-    - For each project entry, identify: project name and tools used
-    - Output ONLY a valid JSON string with no additional text or explanations
-    - Use consistent formatting and avoid duplicates
-    - No identation
+        TASK: Extract ALL project entries from the resume.
 
-    OUTPUT FORMAT:
-    {{
-    "projects": [
-        {{
-        "name": "Project name",
-        "tools": "Technologies, tools, and frameworks used",
-        }}
-    ]
-    }}
+        For each project entry, extract:
+        - Project name
+        - Description: EXACTLY 5 keywords describing key responsibilities and technologies
 
-    RESUME TEXT:
-    {text_resume}
+        IMPORTANT RULES:
+        1. Output ONLY valid JSON format
+        2. No additional text, comments, or explanations
+        3. Use exact field names as shown in the format
+        4. Description must contain MAXIMUM 5 keywords separated by commas
+        5. Keywords should focus on: technologies, tools, responsibilities, achievements
+        6. If information is missing, use empty string ""
+        7. No indentation or formatting
 
-    JSON OUTPUT:
-    """
+        OUTPUT FORMAT:
+        {{"projects": [{{"name": "Project name", "description": "Responsibilities, acchievements, technologies, tools, and frameworks used"}}]}}
+
+        RESUME TEXT:
+        {text_resume}
+
+        JSON OUTPUT:"""
     )
 
     out_parser = StrOutputParser()
@@ -141,39 +134,30 @@ def extract_projects(llm: HuggingFacePipeline, text_resume: str):
 def extract_skills(llm: HuggingFacePipeline, text_resume: str):
     print("Extracting skills ...")
     skills_prompt = PromptTemplate.from_template(
-        """
-    You are an expert resume parser. Extract skills information from the provided resume text.
+        """You are an expert resume parser.
 
-    INSTRUCTIONS:
-    - Extract ALL skills mentioned in the resume
-    - Categorize skills into technical skills, soft skills, and languages
-    - Associate proficiency to skills
-    - Identify soft skills by focusing on descriptions in the projects and experience sections
-    - Output ONLY a valid JSON string with no additional text or explanations
-    - Use consistent formatting and avoid duplicates
-    - JSON format should be respected
-    - No indentation
+        TASK: Extract ALL skills from the resume.
 
-    OUTPUT FORMAT:
-    {{
-    "skills": [
-        {{
-        "Languages": ["language1/Beginner", "language2/Intermediate", "language3/Expert"]
-        }},
-        {{
-        "Technical": ["skill1/Beginner", "skill2/Intermediate", "skill3/Expert"]
-        }},
-        {{
-        "Soft Skills": ["skill1/Beginner", "skill2/Intermediate", "skill3/Expert"]
-        }}
-    ]
-    }}
+        For each skill category, extract:
+        - Programming languages and proficiency level
+        - Technical skills and tools
+        - Soft skills and competencies
 
-    RESUME TEXT:
-    {text_resume}
+        IMPORTANT RULES:
+        1. Output ONLY valid JSON format
+        2. No additional text, comments, or explanations
+        3. Use exact field names as shown in the format
+        4. Skills should include proficiency level when mentioned
+        5. If information is missing, use empty array []
+        6. No indentation or formatting
 
-    JSON OUTPUT:
-    """
+        OUTPUT FORMAT:
+        {{"skills": [{{"name": "skill name", "proficiency": "skill proficiency}}]}}
+
+        RESUME TEXT:
+        {text_resume}
+
+        JSON OUTPUT:"""
     )
 
     out_parser = StrOutputParser()
@@ -195,15 +179,16 @@ def parse_topic(topic, llm, text_resume, max_failure):
                 topic_analysis = extract_education(llm, text_resume)
             elif topic == "experience":
                 topic_analysis = extract_experience(llm, text_resume)
-                print("exp : \n", topic_analysis)
             elif topic == "projects":
                 topic_analysis = extract_projects(llm, text_resume)
             elif topic == "skills":
                 topic_analysis = extract_skills(llm, text_resume)
+                print("skl \n", topic_analysis)
             else:
                 raise NotImplementedError(f"topic {topic} was not found !")
 
             topic_analysis = parse_analysis(topic_analysis, topic)
+            print("topic parsed \n", topic_analysis)
             topic_analysis = json.loads(topic_analysis)
             break
 
@@ -216,14 +201,11 @@ def parse_topic(topic, llm, text_resume, max_failure):
 
 def parse_analysis(topic_analysis: str, topic: str):
     topic_analysis = topic_analysis.strip()
-
-    if "JSON OUTPUT:" in topic_analysis:
-        topic_analysis = topic_analysis.split("JSON OUTPUT:")[-1].strip()
-    if "{" in topic_analysis and topic in topic_analysis:
-        start_idx = topic_analysis.find('{"' + topic + '"')
+    if topic in topic_analysis:
+        start_idx = topic_analysis.find("[{")
         end_idx = topic_analysis.find("]}")
 
-    return topic_analysis[start_idx : end_idx + 2]
+    return topic_analysis[start_idx : end_idx + 1]
 
 
 def extract_profile(hf_api_key: str, text_resume: str, max_failure: int = 10):
@@ -232,7 +214,7 @@ def extract_profile(hf_api_key: str, text_resume: str, max_failure: int = 10):
 
         print("Loading the analyser ...")
         login(hf_api_key)
-        model_id = "Qwen/Qwen3-8B"
+        model_id = "Qwen/Qwen3-4B"
         tokenizer = AutoTokenizer.from_pretrained(model_id)
         model = AutoModelForCausalLM.from_pretrained(model_id)
         pipe = pipeline(
@@ -243,15 +225,15 @@ def extract_profile(hf_api_key: str, text_resume: str, max_failure: int = 10):
         )
 
         combined_profile = {}
-        # topics = ["education", "experience", "projects", "skills"]
-        topics = ["experience"]
+        topics = ["education", "experience", "projects", "skills"]
+        # topics = ["skills"]
         progress_bar = st.progress(0)
         status_text = st.empty()
 
         for i, topic in enumerate(topics):
             status_text.text(f"Extracting {topic}...")
             topic_analysis = parse_topic(topic, llm, text_resume, max_failure)
-            combined_profile[topic] = topic_analysis[topic]
+            combined_profile[topic] = topic_analysis
 
             progress = (i + 1) / len(topics)
             progress_bar.progress(progress)
