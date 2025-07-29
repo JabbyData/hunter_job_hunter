@@ -14,7 +14,6 @@ def find_jobs(search_criteria):
     with st.spinner("Finding jobs ..."):
         jobs = scrape_jobs(
             site_name=[
-                "indeed",
                 "linkedin",
             ],
             search_term=search_criteria["job_title"],
@@ -23,6 +22,7 @@ def find_jobs(search_criteria):
             results_wanted=50,  # for each site
             hours_old=180,
             country_indeed=search_criteria["country"],
+            linkedin_fetch_description=True,
         )
     st.markdown(
         f"<h3 style='text-align: center;'>Found {len(jobs)} jobs !</h3>",

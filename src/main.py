@@ -57,7 +57,7 @@ def main():
 
         if display_search_button():
             jobs = find_jobs(search_criteria)
-            print(jobs["description"][0])
+            jobs.to_csv(os.path.join("src", "data", "jobs.csv"), index=False)
 
 
 if __name__ == "__main__":
