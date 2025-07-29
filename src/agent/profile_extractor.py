@@ -2,6 +2,7 @@
 Module containing langchain functions
 """
 
+import os
 from huggingface_hub import login
 from langchain_huggingface.llms import HuggingFacePipeline
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
@@ -213,12 +214,12 @@ def parse_analysis(topic_analysis: str, topic: str):
     return topic_analysis[start_idx : end_idx + 1]
 
 
-def extract_profile(hf_api_key: str, text_resume: str, max_failure: int = 10):
+def extract_profile(text_resume: str, max_failure: int = 10):
     try:
         print("Text to analyze \n", text_resume)
 
         print("Loading the analyser ...")
-        login(hf_api_key)
+        login(os.environ["HUGGINGFACEHUB_API_KEY"])
         model_id = "Qwen/Qwen3-4B"
         tokenizer = AutoTokenizer.from_pretrained(model_id)
         model = AutoModelForCausalLM.from_pretrained(model_id)
@@ -232,26 +233,24 @@ def extract_profile(hf_api_key: str, text_resume: str, max_failure: int = 10):
         combined_profile = {}
         topics = ["education", "experience", "projects", "skills"]
         progress_bar = st.progress(0)
-        status_text = st.empty()
 
         for i, topic in enumerate(topics):
-            status_text.text(f"Extracting {topic}...")
-            topic_analysis = parse_topic(topic, llm, text_resume, max_failure)
+            with st.spinner(f"Extracting {topic}..."):
+                topic_analysis = parse_topic(topic, llm, text_resume, max_failure)
             combined_profile[topic] = topic_analysis
 
             progress = (i + 1) / len(topics)
             progress_bar.progress(progress)
 
-        status_text.text("Recommending jobs ...")
+        st.text("Profile extracted !")
 
-        st.subheader("Recommended Job Positions")
-        rec_analysis = recommend_job(combined_profile, llm)
-        rec_analysis = rec_analysis.strip("[]").split(",")
-        for job in rec_analysis:
-            job = job.strip().strip('"')
-            st.write(f"• {job}")
-
-        status_text.text("Profile analyzed !")
+        st.subheader("📁 Recommended Job Positions")
+        with st.spinner(f"Recommending jobs ..."):
+            rec_analysis = recommend_job(combined_profile, llm)
+            rec_analysis = rec_analysis.strip("[]").split(",")
+            for job in rec_analysis:
+                job = job.strip().strip('"')
+                st.write(f"• {job}")
 
         return combined_profile
 

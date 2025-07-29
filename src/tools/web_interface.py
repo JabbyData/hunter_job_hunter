@@ -56,3 +56,99 @@ def display_api_box():
     )
 
     return api_key
+
+
+def display_search_criteria():
+    st.markdown("### 🔍 Search Criteria")
+
+    job_title = st.text_input(
+        "Job Title/Position",
+        placeholder="ex Data Scientist",
+        help="Enter the job title or position you're looking for.",
+    )
+
+    country = st.text_input(
+        "Country",
+        placeholder="ex France",
+        help="Enter your preferred job country location.",
+    )
+
+    city = st.text_input(
+        "City", placeholder="ex Paris", help="Enter your preferred job city location."
+    )
+
+    seniority = st.selectbox(
+        "Seniority",
+        ["Any", "Entry Level", "Mid Level", "Senior Level", "Executive"],
+        help="Select your experience level.",
+    )
+
+    job_type = st.selectbox(
+        "Job Type",
+        ["Fulltime", "Parttime", "Internship", "Contract"],
+        help="Select your preferred job type.",
+    )
+
+    industry = st.text_input(
+        "Industry", placeholder="ex Technology", help="Enter your preferred industry."
+    )
+
+    col1, col2 = st.columns(2)
+    with col1:
+        min_salary = st.number_input(
+            "Minimum Monthly Salary (€)",
+            min_value=0,
+            value=2000,
+            step=1000,
+            help="Enter minimum monthly expected salary.",
+        )
+    with col2:
+        max_salary = st.number_input(
+            "Maximum Monthly Salary (€)",
+            min_value=0,
+            value=10000,
+            step=1000,
+            help="Enter maximum monthly expected salary.",
+        )
+
+    max_distance = st.slider(
+        "Maximum Distance (km)",
+        min_value=0,
+        max_value=100,
+        value=25,
+        step=1,
+        help="Maximum distance from your location in kilometers.",
+    )
+
+    return {
+        "job_title": job_title,
+        "country": country,
+        "city": city,
+        "seniority": seniority,
+        "job_type": job_type,
+        "industry": industry,
+        "min_salary": min_salary,
+        "max_salary": max_salary,
+        "max_distance": max_distance,
+    }
+
+
+def display_search_button():
+    """
+    Displays a search button for job hunting.
+
+    Returns:
+        bool: True if the search button is clicked, False otherwise.
+    """
+    st.markdown("---")
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        search_clicked = st.button(
+            "🔍 Start Job Search",
+            type="primary",
+            help="Click to start searching for jobs based on your criteria",
+            use_container_width=True,
+        )
+
+    return search_clicked

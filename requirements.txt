@@ -4,4 +4,4 @@ langchain_core
 langchain-huggingface
 transformers
 torch
-selenium
+python-jobspy

@@ -5,8 +5,17 @@
 conda create -n hjh python=3.11
 conda activate hjh
 pip install -r requirements.txt
+pip install -U python-jobspy
 ```
 
 ### 2. PDF profiling
+Use a local LLM to parse profile
+Resume must have the following sections : 
+- Education
+- Experience
+- Projects
+- Skills
 
 ### 3. Websites parsing
+Use JobSpy to fetch jobs on linkedin, indeed and glassdoor
+
