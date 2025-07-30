@@ -31,7 +31,7 @@ def extract_job_info(job_description: str, llm: OllamaLLM):
         IMPORTANT RULES:
             1. If value are missing, replace them with -1.
             2. Respect the output format. Do not use extra explanation.
-            3. Do not use values from the example if they do not appear in the job description.
+            3. To fill output fields, use values from the job description ONLY.
         
         OUTPUT FORMAT:
             {{
@@ -60,10 +60,15 @@ def extract_job_info(job_description: str, llm: OllamaLLM):
 
     structured_job_info = chain.invoke({"job_description": job_description})
 
-    return structured_job_info
+    start_idx = structured_job_info.find("{")
+    end_idx = structured_job_info.find("}")
 
+    return structured_job_info[start_idx : end_idx + 1]
 
-def filter_jobs(user_profile: dict, jobs: dict, search_criteria: dict) -> float:
+def match_job_profile(user_profile: dict , search_criteria: dict, structured_job_info: dict):
+    pass
+
+def filter_jobs(user_profile: dict,  search_criteria: dict, jobs: pd.DataFrame) -> float:
     """
     Brief description of what the function does.
 
@@ -98,7 +103,7 @@ def filter_jobs(user_profile: dict, jobs: dict, search_criteria: dict) -> float:
         print(f"Analyzing job {i}...")
         structured_job_info = extract_job_info(job_description, llm)
 
-        print(structured_job_info)
+        if match_job_profile(user_profile,search_criteria,structured_job_info)
 
     try:
         subprocess.run(["pkill", "-f", "ollama"], check=False)

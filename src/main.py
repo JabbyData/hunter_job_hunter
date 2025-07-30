@@ -38,26 +38,20 @@ def main():
 
     # Profile extraction
     if uploaded_pdf is not None:
-        # text = extract_text_from_pdf(uploaded_pdf)
-        # hf_api_key = display_api_box()
+        text = extract_text_from_pdf(uploaded_pdf)
+        profile_analysis = extract_profile(text_resume=text)
 
-        # if len(hf_api_key) != 0:
-        #     os.environ["HUGGINGFACEHUB_API_KEY"] = hf_api_key
-        #     profile_analysis = extract_profile(text_resume=text)
-
-        #     print("Profile extracted !")
-        #     with open(os.path.join("src", "data", "profile_analysis.json"), "w") as fp:
-        #         json.dump(profile_analysis, fp)
+        print("Profile extracted !")
 
         # Job parsing
-        search_criteria = display_search_criteria()
-        print("Search criteria parsed !")
+        # search_criteria = display_search_criteria()
+        # print("Search criteria parsed !")
         # with open(os.path.join("src", "data", "search_criteria.json"), "w") as fp:
         #     json.dump(search_criteria, fp)
 
-        if display_search_button():
-            jobs = find_jobs(search_criteria)
-            jobs.to_csv(os.path.join("src", "data", "jobs.csv"), index=False)
+        # if display_search_button():
+        #     jobs = find_jobs(search_criteria)
+        #     jobs.to_csv(os.path.join("src", "data", "jobs.csv"), index=False)
 
 
 if __name__ == "__main__":
