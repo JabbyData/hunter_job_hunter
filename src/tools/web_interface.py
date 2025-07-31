@@ -47,19 +47,6 @@ def generate_web_interface():
     st.session_state.uploaded_pdf = uploaded_file
 
 
-def display_api_box():
-    st.markdown("### 🔑 API Configuration")
-
-    api_key = st.text_input(
-        "Please enter your HugginFace API key:",
-        type="password",
-        placeholder="Enter your HugginFace API key here...",
-        help="This key will be used to access external services",
-    )
-
-    return api_key
-
-
 def display_search_criteria():
     st.markdown("### 🔍 Search Criteria")
 

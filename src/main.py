@@ -2,7 +2,6 @@
 Main module to run interface
 """
 
-import os
 from tools.web_interface import (
     generate_web_interface,
     display_search_criteria,
@@ -43,7 +42,6 @@ def main():
         if "profile_analysis" not in st.session_state:
             text = extract_text_from_pdf(st.session_state.uploaded_pdf)
             st.session_state.profile_analysis = extract_profile(text_resume=text)
-            print("Profile extracted !")
 
             st.session_state.rec_analysis = st.session_state.rec_analysis.strip(
                 "[]"
@@ -56,7 +54,6 @@ def main():
 
         if st.session_state.profile_analysis is not None:
             search_criteria = dict(display_search_criteria())
-            print("Search criteria parsed !")
 
             if display_search_button():
                 jobs = find_jobs(search_criteria)
@@ -72,7 +69,6 @@ def main():
                         .iloc[idx_job]
                         .reset_index(drop=True)
                     )
-                    print("jobs selected \n", selected_jobs)
 
                 display_selected_jobs(
                     selected_jobs=selected_jobs,

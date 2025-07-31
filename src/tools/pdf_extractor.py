@@ -23,9 +23,6 @@ def extract_text_from_pdf(pdf_file) -> float:
         >> extract_text_from_pdf("resume.pdf")
         "John Doe\nSoftware Engineer\n..."
     """
-    # Function implementation
-    print("Extracting pdf text ...")
-    # text = extract_text(pdf_file) # pdfminer
     doc = fitz.open(stream=pdf_file.read(), filetype="pdf")  # PyMuPDF
     text = ""
     for page in doc:

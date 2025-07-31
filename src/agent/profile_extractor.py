@@ -11,7 +11,6 @@ import time
 
 
 def extract_profile_info(llm: OllamaLLM, text_resume: str):
-    print("Extracting profile ...")
     profile_prompt = PromptTemplate.from_template(
         """You are an expert resume parser specializing in business information extraction.
 
@@ -74,7 +73,6 @@ def analyse_profile(llm, text_resume, max_failure):
 
 def extract_profile(text_resume: str, max_failure: int = 10):
     try:
-        print("Loading the analyser ...")
 
         try:
             subprocess.Popen(

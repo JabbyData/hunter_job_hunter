@@ -2,14 +2,11 @@
 Module to scrape websites
 """
 
-import csv
-import os
 from jobspy import scrape_jobs
 import streamlit as st
 
 
 def find_jobs(search_criteria):
-    print("Scraping jobs ...")
 
     with st.spinner("Finding jobs ..."):
         jobs = scrape_jobs(
@@ -19,7 +16,7 @@ def find_jobs(search_criteria):
             search_term=search_criteria["job_title"],
             location=search_criteria["city"] + "," + search_criteria["country"],
             job_type=search_criteria["job_type"].lower(),
-            results_wanted=20,  # for each site
+            results_wanted=10,  # for each site
             hours_old=180,
             country_indeed=search_criteria["country"],
             linkedin_fetch_description=True,
@@ -28,5 +25,4 @@ def find_jobs(search_criteria):
         f"<h3 style='text-align: center;'>Found {len(jobs)} jobs !</h3>",
         unsafe_allow_html=True,
     )
-    print(f"Found {len(jobs)} jobs !")
     return jobs
