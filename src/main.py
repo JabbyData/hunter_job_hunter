@@ -12,7 +12,7 @@ from tools.web_interface import (
 from tools.pdf_extractor import extract_text_from_pdf
 from tools.scraper import find_jobs
 from agent.profile_extractor import extract_profile
-import json
+import streamlit as st
 
 
 def main():
@@ -34,24 +34,36 @@ def main():
     >>> main(arg_1, arg_2, arg_n)
         expected_output
     """
-    uploaded_pdf = generate_web_interface()
+
+    generate_web_interface()
 
     # Profile extraction
-    if uploaded_pdf is not None:
-        text = extract_text_from_pdf(uploaded_pdf)
-        profile_analysis = extract_profile(text_resume=text)
+    if "uploaded_pdf" in st.session_state and st.session_state.uploaded_pdf is not None:
+        if "profile_analysis" not in st.session_state:
+            text = extract_text_from_pdf(st.session_state.uploaded_pdf)
+            st.session_state.profile_analysis = extract_profile(text_resume=text)
+            print("Profile extracted !")
+            print(st.session_state.profile_analysis)
 
-        print("Profile extracted !")
+            st.session_state.rec_analysis = st.session_state.rec_analysis.strip(
+                "[]"
+            ).split(",")
 
-        # Job parsing
-        # search_criteria = display_search_criteria()
-        # print("Search criteria parsed !")
-        # with open(os.path.join("src", "data", "search_criteria.json"), "w") as fp:
-        #     json.dump(search_criteria, fp)
+        st.subheader("📁 Recommended Job Positions")
+        for job in st.session_state.rec_analysis:
+            job = job.strip().strip('"')
+            st.write(f"• {job}")
 
-        # if display_search_button():
-        #     jobs = find_jobs(search_criteria)
-        #     jobs.to_csv(os.path.join("src", "data", "jobs.csv"), index=False)
+        if st.session_state.profile_analysis is not None:
+            search_criteria = dict(display_search_criteria())
+            print("Search criteria parsed !")
+
+            if display_search_button():
+                jobs = find_jobs(search_criteria)  # needs update
+                jobs.to_csv(os.path.join("src", "data", "jobs.csv"), index=False)
+
+        # Matching user and jobs profile
+        # extract job info
 
 
 if __name__ == "__main__":

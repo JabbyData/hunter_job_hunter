@@ -3,7 +3,7 @@ Module to implement a matchmaker agent
 """
 
 import pandas as pd
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import PromptTemplate
 from langchain_ollama.llms import OllamaLLM
 from langchain_core.output_parsers import StrOutputParser
 import subprocess
@@ -11,11 +11,10 @@ import time
 
 
 def extract_job_info(job_description: str, llm: OllamaLLM):
-
-    job_prompt = ChatPromptTemplate.from_template(
+    job_prompt = PromptTemplate.from_template(
         """You are an expert analyst.
 
-        TASK: Extract the following information from the job description :
+        TASK: Extract the follofwing entries from the JOB DESCRIPTION:
             0. Job title.
             1. Industry,  business area the job is dealing with.
             2. City location.
@@ -24,29 +23,27 @@ def extract_job_info(job_description: str, llm: OllamaLLM):
             5. Job level : should be converted into one of the following values ["internship", "entry-level", "mid-senior level", "executive"].
             6. Minimum salary.
             7. Maximum salary.
-            8. Highest degree level (should be one of the following values ["BSc","MSc","PhD"]) of the candidate associated with the area.
-            10. Details about experience in a specific area : name of area + duration (in years).
+            8. Degree level (should be one of the following values ["BSc","MSc","PhD"]) of the candidate associated with the related areas of studys.
+            10. Details about experience in a specific area : name of area + duration (in months).
             11. All the skills associated with their proficiency level (beginner, intermediate or fluent).
             
         IMPORTANT RULES:
             1. If value are missing, replace them with -1.
             2. Respect the output format. Do not use extra explanation.
-            3. To fill output fields, use values from the job description ONLY.
+            3. Replace example from OUTPUT FORMAT only using elements extracted from JOB DESCRIPTION. 
         
         OUTPUT FORMAT:
-            {{
-                "job_title": "ai engineer",
-                "industry": "technology",
-                "city": "Paris",
-                "country": "France",
-                "job_type": "fulltime",
-                "job_level": "entry-level",
-                "min_salary": 3000,
-                "max_salary": 5000,
-                "degree_level": [("MSc","Data Science")],
-                "experience": [("Software engineering",2),("Data scientist",1)],
-                "skills": [("English","Fluent"),("Pytorch","Intermediate"),("Git","beginner")]
-            }}
+            {{"job_title": job title,
+            "industry": industry,
+            "city": city,
+            "country": country
+            "job_type": job type,
+            "seniority": entry level,
+            "min_salary": min salary,
+            "max_salary": max salary,
+            "education": list with education outputs,
+            "experience": list with experience outputs,
+            "skills": list with skill outputs}}
             
         JOB DESCRIPTION:
         {job_description}
@@ -65,10 +62,30 @@ def extract_job_info(job_description: str, llm: OllamaLLM):
 
     return structured_job_info[start_idx : end_idx + 1]
 
-def match_job_profile(user_profile: dict , search_criteria: dict, structured_job_info: dict):
-    pass
 
-def filter_jobs(user_profile: dict,  search_criteria: dict, jobs: pd.DataFrame) -> float:
+def match_job_profile(
+    user_profile: dict,
+    search_criteria: dict,
+    structured_job_info: dict,
+    llm: OllamaLLM,
+):
+    match_prompt = PromptTemplate.from_template(
+        """
+        You are a professional recruiter.
+
+        Task : Compare entries from USER_PROFILE and SEARCH_CRITERIA with the ones of STRUCTURED_JOB_INFO and indicate if the candidate is a good match.
+
+        IMPORTANT RULES:
+            0. "-1" values are not comparable, skip them.
+            1. USER_PROFILE, SEARCH_CRITERIA and STRUCTURED_JOB_INFO are presented as hashmap : an entry is a couple key/value.
+            1. For each entry, compare values from USER_PROFILE or SEARCH_CRITERIA to the value of the corresponding key in STRUCTURED_JOB_INFO.
+            # TODO : OCNTINUE
+    
+        """
+    )
+
+
+def filter_jobs(user_profile: dict, search_criteria: dict, jobs: pd.DataFrame) -> float:
     """
     Brief description of what the function does.
 
@@ -102,8 +119,10 @@ def filter_jobs(user_profile: dict,  search_criteria: dict, jobs: pd.DataFrame) 
     for i, job_description in enumerate(jobs["description"]):
         print(f"Analyzing job {i}...")
         structured_job_info = extract_job_info(job_description, llm)
+        print(structured_job_info)
 
-        if match_job_profile(user_profile,search_criteria,structured_job_info)
+        # if match_job_profile(user_profile, search_criteria, structured_job_info):
+        #     print("Good job !")
 
     try:
         subprocess.run(["pkill", "-f", "ollama"], check=False)
@@ -126,3 +145,4 @@ if __name__ == "__main__":
         ]
     ].iloc[:2]
     filter_jobs(user_profile=None, jobs=jobs, search_criteria=None)
+    # TODO : compute to dict + match user profile

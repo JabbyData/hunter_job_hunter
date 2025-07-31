@@ -3,6 +3,7 @@ Module to set-up web-interface
 """
 
 import streamlit as st
+import math
 
 
 def generate_web_interface():
@@ -42,7 +43,7 @@ def generate_web_interface():
     else:
         st.info("👆 Please upload a PDF file to get started")
 
-    return uploaded_file
+    st.session_state.uploaded_pdf = uploaded_file
 
 
 def display_api_box():
@@ -79,13 +80,13 @@ def display_search_criteria():
 
     seniority = st.selectbox(
         "Seniority",
-        ["Any", "Entry Level", "Mid Level", "Senior Level", "Executive"],
+        ["Any", "Internship", "Entry level", "Mid-senior level", "Associate"],
         help="Select your experience level.",
     )
 
     job_type = st.selectbox(
         "Job Type",
-        ["Fulltime", "Parttime", "Internship", "Contract"],
+        ["Any", "Fulltime", "Parttime", "Internship", "Contract"],
         help="Select your preferred job type.",
     )
 
@@ -93,23 +94,11 @@ def display_search_criteria():
         "Industry", placeholder="ex Technology", help="Enter your preferred industry."
     )
 
-    col1, col2 = st.columns(2)
-    with col1:
-        min_salary = st.number_input(
-            "Minimum Monthly Salary (€)",
-            min_value=0,
-            value=2000,
-            step=1000,
-            help="Enter minimum monthly expected salary.",
-        )
-    with col2:
-        max_salary = st.number_input(
-            "Maximum Monthly Salary (€)",
-            min_value=0,
-            value=10000,
-            step=1000,
-            help="Enter maximum monthly expected salary.",
-        )
+    min_salary = st.text_input(
+        "Max Salary",
+        placeholder="ex 2000",
+        help="Enter your minimum expected salary in euros.",
+    )
 
     max_distance = st.slider(
         "Maximum Distance (km)",
@@ -128,8 +117,7 @@ def display_search_criteria():
         "job_type": job_type,
         "industry": industry,
         "min_salary": min_salary,
-        "max_salary": max_salary,
-        "max_distance": max_distance,
+        "max_distance": math.ceil(max_distance * 0.621371),  # convert to miles
     }
 
 

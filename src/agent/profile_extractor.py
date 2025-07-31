@@ -12,29 +12,31 @@ import time
 
 def extract_profile_info(llm: OllamaLLM, text_resume: str):
     print("Extracting profile ...")
-    educ_prompt = PromptTemplate.from_template(
-        """You are an expert resume parser.
+    profile_prompt = PromptTemplate.from_template(
+        """You are an expert resume parser specializing in business information extraction.
 
-        TASK: Extract all education, experience, project and skill related entries from text_resume.
+        TASK: Extract all education, experience, project and skill related entries from text_resume, with focus on business-relevant information.
 
         EXTRACTION RULES:
         1. Output ONLY valid DICT format.
         2. No additional text, comments, or explanations.
-        3. For each education entry, extract the degree level and the area of study.
-        4. Degree level should be converted to one of these values ["BSc","MSc","PhD"].
-        5. For each experience and project entry, extract 5 technical keywords describing the business area / industry and associate with the duration in years.
-        6. Experience and project entries should be considered as experience in the output.
-        7. For each skill entry, extract the skill name and associate it with the proficiency.
-        8. Proficiency should be converted to one of these values : ["beginner","intermediate","expert"].
+        3. Education results are stored in a list. For each education entry:
+            a) Add the couple (degree level, area of study) to the EDUCATION LIST.
+        4. Degree level should be converted to one of these values ["bsc","msc","phd"].
+        5. Experience and project results are stored in a list. For each experience and project entry :
+            a) Add the couple (description, duration in months) to the EXPERIENCE / PROJECT LIST.
+        6. Experience and project entries should be considered as experience in the output. Make sure to treat ALL entries.
+        7. Skill results are stored in a list. For each skill entry:
+            a) Add the couple (skill, proficiency) to the SKILL LIST.
+            b) Proficiency should be converted to one of these values : ["beginner","intermediate","expert"]. Infer from description associated with the skill.
         9. If information is missing, replace it by -1.
         10. No indentation or formatting.
+        11. Use lower case style.
 
         OUTPUT FORMAT:
-        {{
-            "education": [("MSc","Data Science"],
-            "experience": [("AI, ML, time series, forecasting, LLM" , 1)],
-            "skill": [("skill name", "proficiency")]
-        }}
+            {{"education": EDUCATION LIST,
+            "experience": EXPERIENCE / PROJECT LIST,
+            "skill": SKILL LIST}}
 
         RESUME TEXT:
         {text_resume}
@@ -44,11 +46,11 @@ def extract_profile_info(llm: OllamaLLM, text_resume: str):
 
     out_parser = StrOutputParser()
 
-    chain = educ_prompt | llm | out_parser
+    chain = profile_prompt | llm | out_parser
 
-    edu_analysis = chain.invoke({"text_resume": text_resume})
+    profile_analysis = chain.invoke({"text_resume": text_resume})
 
-    return edu_analysis
+    return profile_analysis
 
 
 def analyse_profile(llm, text_resume, max_failure):
@@ -91,13 +93,8 @@ def extract_profile(text_resume: str, max_failure: int = 10):
 
         st.text("Profile extracted !")
 
-        st.subheader("📁 Recommended Job Positions")
         with st.spinner(f"Recommending jobs ..."):
-            rec_analysis = recommend_job(resume_analysis, llm)
-            rec_analysis = rec_analysis.strip("[]").split(",")
-            for job in rec_analysis:
-                job = job.strip().strip('"')
-                st.write(f"• {job}")
+            st.session_state.rec_analysis = recommend_job(resume_analysis, llm)
 
         return resume_analysis
 
