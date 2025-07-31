@@ -14,23 +14,25 @@ def extract_job_info(job_description: str, llm: OllamaLLM):
     job_prompt = PromptTemplate.from_template(
         """You are an expert analyst.
 
-        TASK: Extract the follofwing entries from the JOB DESCRIPTION:
+        TASK: Extract the following entries from the JOB DESCRIPTION:
             0. Job title.
             1. Industry,  business area the job is dealing with.
-            2. City location.
-            3. Country location.
+            2. City location. Make sure to output a valid city name.
+            3. Country location. Make sure to output a valid country name.
             4. Job type : should be converted into one of the following values ["fulltime", "parttime", "internship", "contract].
             5. Job level : should be converted into one of the following values ["internship", "entry-level", "mid-senior level", "executive"].
             6. Minimum salary.
             7. Maximum salary.
-            8. Degree level (should be one of the following values ["BSc","MSc","PhD"]) of the candidate associated with the related areas of studys.
-            10. Details about experience in a specific area : name of area + duration (in months).
-            11. All the skills associated with their proficiency level (beginner, intermediate or fluent).
+            8. List of education requirements. For each education requirement :
+                a) Add the couple (degree level, area of study) in the EDUCATION LIST. Degree level should be one of the following values ["BSc","MSc","PhD"].
+            9. List of experience requirements. For each experience requirement :
+                a) Add the couple (area, duration) to the EXPERIENCE LIST. Duration should be in months.
+            10. List of skills requirements, For each skill requirement:
+                a) Add the couple (skill, proficiency) to the SKILL LIST. Proficiency should be one of the following values ["beginner", "intermediate", "expert"].
             
         IMPORTANT RULES:
             1. If value are missing, replace them with -1.
             2. Respect the output format. Do not use extra explanation.
-            3. Replace example from OUTPUT FORMAT only using elements extracted from JOB DESCRIPTION. 
         
         OUTPUT FORMAT:
             {{"job_title": job title,
@@ -41,9 +43,9 @@ def extract_job_info(job_description: str, llm: OllamaLLM):
             "seniority": entry level,
             "min_salary": min salary,
             "max_salary": max salary,
-            "education": list with education outputs,
-            "experience": list with experience outputs,
-            "skills": list with skill outputs}}
+            "education": EDUCATION LIST,
+            "experience": EXPERIENCE LIST,
+            "skills": SKILL LIST}}
             
         JOB DESCRIPTION:
         {job_description}
@@ -73,7 +75,7 @@ def match_job_profile(
         """
         You are a professional recruiter.
 
-        Task : Compare entries from USER_PROFILE and SEARCH_CRITERIA with the ones of STRUCTURED_JOB_INFO and indicate if the candidate is a good match.
+        Task : Compare entries from USER_PROFILE and SEARCH_CRITERIA with the ones of STRUCTURED_JOB_INFO and decide if the candidate is a good match for the job.
 
         IMPORTANT RULES:
             0. "-1" values are not comparable, skip them.
