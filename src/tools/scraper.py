@@ -19,7 +19,7 @@ def find_jobs(search_criteria):
             search_term=search_criteria["job_title"],
             location=search_criteria["city"] + "," + search_criteria["country"],
             job_type=search_criteria["job_type"].lower(),
-            results_wanted=50,  # for each site
+            results_wanted=20,  # for each site
             hours_old=180,
             country_indeed=search_criteria["country"],
             linkedin_fetch_description=True,

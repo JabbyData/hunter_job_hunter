@@ -8,6 +8,7 @@ from langchain_ollama.llms import OllamaLLM
 from langchain_core.output_parsers import StrOutputParser
 import subprocess
 import time
+import streamlit as st
 
 
 def extract_job_info(job_description: str, llm: OllamaLLM):
@@ -35,17 +36,7 @@ def extract_job_info(job_description: str, llm: OllamaLLM):
             2. Respect the output format. Do not use extra explanation.
         
         OUTPUT FORMAT:
-            {{"job_title": job title,
-            "industry": industry,
-            "city": city,
-            "country": country
-            "job_type": job type,
-            "seniority": entry level,
-            "min_salary": min salary,
-            "max_salary": max salary,
-            "education": EDUCATION LIST,
-            "experience": EXPERIENCE LIST,
-            "skills": SKILL LIST}}
+            {{"job_title": job title,"industry": industry,"city": city,"country": country"job_type": job type,"seniority": entry level,"min_salary": min salary,"max_salary": max salary,"education": EDUCATION LIST,"experience": EXPERIENCE LIST,"skills": SKILL LIST}}
             
         JOB DESCRIPTION:
         {job_description}
@@ -75,16 +66,41 @@ def match_job_profile(
         """
         You are a professional recruiter.
 
-        Task : Compare entries from USER_PROFILE and SEARCH_CRITERIA with the ones of STRUCTURED_JOB_INFO and decide if the candidate is a good match for the job.
+        Task : Compare entries from USER_PROFILE and its SEARCH_CRITERIA with the requirements of STRUCTURED_JOB_INFO and decide if the candidate is a good match for the job.
 
         IMPORTANT RULES:
-            0. "-1" values are not comparable, skip them.
-            1. USER_PROFILE, SEARCH_CRITERIA and STRUCTURED_JOB_INFO are presented as hashmap : an entry is a couple key/value.
-            1. For each entry, compare values from USER_PROFILE or SEARCH_CRITERIA to the value of the corresponding key in STRUCTURED_JOB_INFO.
-            # TODO : OCNTINUE
-    
+            1. USER_PROFILE, SEARCH_CRITERIA and STRUCTURED_JOB_INFO are presented as dictionnaries. Use key / value pairs to match requirements with user's profile and search.
+            2. "-1" or -1 values are not comparable, skip them.
+            3. If cities from SEARCH_CRITERIA AND STRUCTURED_JOB_INFO are not the same, compare distance.
+            3. Output a boolean MATCH_BOOL indicating if the user is a good candidate for the job. Output a short MATCH_DESCRIPTION (less than 100 words) arguing why the candidate is or isn't a good match.
+            4. Output only the couple (MATCH_BOOL,MATCH_DESCRIPTION). No extra explanation.
+
+        USER PROFILE:
+        {user_profile}
+
+        SEARCH CRITERIA:
+        {search_criteria}
+
+        STRUCTURED_JOB_INFO:
+        {structured_job_info}
+
+        OUTPUT FORMAT: 
+        (MATCH_BOOL,MATCH_DESCRIPTION)
         """
     )
+
+    out_parser = StrOutputParser()
+
+    match_chain = match_prompt | llm | out_parser
+    match_output = match_chain.invoke(
+        {
+            "user_profile": user_profile,
+            "search_criteria": search_criteria,
+            "structured_job_info": structured_job_info,
+        }
+    )
+
+    return match_output
 
 
 def filter_jobs(user_profile: dict, search_criteria: dict, jobs: pd.DataFrame) -> float:
@@ -117,34 +133,34 @@ def filter_jobs(user_profile: dict, search_criteria: dict, jobs: pd.DataFrame) -
 
     llm = OllamaLLM(model="gemma3:27b")
 
-    selected_jobs = []
+    idx_job, agent_message = [], []
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+
+    total_jobs = len(jobs["description"])
+
     for i, job_description in enumerate(jobs["description"]):
-        print(f"Analyzing job {i}...")
+        progress = (i + 1) / total_jobs
+        progress_bar.progress(progress)
+        status_text.text(f"Analyzing job {i + 1}/{total_jobs}...")
+
         structured_job_info = extract_job_info(job_description, llm)
-        print(structured_job_info)
 
-        # if match_job_profile(user_profile, search_criteria, structured_job_info):
-        #     print("Good job !")
+        match_output = (
+            match_job_profile(user_profile, search_criteria, structured_job_info, llm)
+            .strip("()")
+            .split(", ")
+        )
+        if match_output[0].lower() == "true":
+            idx_job.append(i)
+            agent_message.append(match_output[1])
 
+    progress_bar.empty()
+    status_text.empty()
     try:
         subprocess.run(["pkill", "-f", "ollama"], check=False)
         time.sleep(2)
     except Exception as e:
         print(f"Failed to kill Ollama server: {e}")
 
-
-if __name__ == "__main__":
-    jobs = pd.read_csv("src/data/jobs.csv")
-    jobs = jobs[
-        [
-            "job_url_direct",
-            "title",
-            "company",
-            "location",
-            "job_type",
-            "job_level",
-            "description",
-        ]
-    ].iloc[:2]
-    filter_jobs(user_profile=None, jobs=jobs, search_criteria=None)
-    # TODO : compute to dict + match user profile
+    return idx_job, agent_message

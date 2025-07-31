@@ -4,6 +4,7 @@ Module to set-up web-interface
 
 import streamlit as st
 import math
+import time
 
 
 def generate_web_interface():
@@ -95,7 +96,7 @@ def display_search_criteria():
     )
 
     min_salary = st.text_input(
-        "Max Salary",
+        "Min Salary",
         placeholder="ex 2000",
         help="Enter your minimum expected salary in euros.",
     )
@@ -140,3 +141,13 @@ def display_search_button():
         )
 
     return search_clicked
+
+
+def display_selected_jobs(selected_jobs, agent_message):
+    with st.spinner("🌐 Displaying opportunities ..."):
+        for i, job in selected_jobs.iterrows():
+            st.write(f"**{job['title']}** at {job['company']}")
+            st.write(f"Agent recommendation: {agent_message[i]}")
+            st.write(f"[Job offer]({job['job_url']})")
+            st.write("---")
+            time.sleep(1)
