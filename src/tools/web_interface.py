@@ -8,22 +8,7 @@ import time
 
 
 def generate_web_interface():
-    """
-    Generates a Streamlit web interface for the Hunter Job Hunter application.
-
-    This function creates a user-friendly web interface with a title, description,
-    and file upload functionality for PDF resumes.
-
-    Returns:
-        streamlit.runtime.uploaded_file_manager.UploadedFile or None:
-            The uploaded PDF file object if a file is uploaded, None otherwise.
-
-    Example:
-        >>> uploaded_file = generate_web_interface()
-        >>> if uploaded_file:
-        ...     print(f"File uploaded: {uploaded_file.name}")
-    """
-    title = "🎯 Welcome to Hunter_J_Hunter !"
+    title = "🎯 Let me introduce you HJH !"
     st.title(title)
     st.markdown(
         "<h3 style='text-align: center;'> Your AI Career Assistant</h3>",
@@ -31,11 +16,10 @@ def generate_web_interface():
     )
     st.markdown("---")
 
-    # File upload section
     st.markdown("### 📄 Upload Your Resume")
     uploaded_file = st.file_uploader(
         "Choose a PDF file",
-        type="pdf",  # autmatically handle pdf file upload
+        type="pdf",
         help="Upload your resume in PDF format",
     )
 

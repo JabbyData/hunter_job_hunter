@@ -16,28 +16,8 @@ import streamlit as st
 
 
 def main():
-    """
-        Brief description of what the function does.
-
-        Args:
-            arg_1 (str): Description of the first parameter.
-            arg_2 (np.array): Description of the second parameter.
-            arg_n (int)(optional): Description of the third parameter.
-
-        Returns:
-            float: Description of the return value.
-
-        Raises:
-            ExceptionType: Description of the exception that might be raised.
-
-        Example:
-    >>> main(arg_1, arg_2, arg_n)
-        expected_output
-    """
-
     generate_web_interface()
 
-    # Profile extraction
     if "uploaded_pdf" in st.session_state and st.session_state.uploaded_pdf is not None:
         if "profile_analysis" not in st.session_state:
             text = extract_text_from_pdf(st.session_state.uploaded_pdf)
@@ -47,10 +27,12 @@ def main():
                 "[]"
             ).split(",")
 
-        st.subheader("📁 Recommended Job Positions")
-        for job in st.session_state.rec_analysis:
-            job = job.strip().strip('"')
-            st.write(f"• {job}")
+        st.markdown("---")
+        with st.expander("📁 Recommended Job Positions", expanded=False):
+            for job in st.session_state.rec_analysis:
+                job = job.strip().strip('"')
+                st.markdown(f"✨ **{job}**")
+        st.markdown("---")
 
         if st.session_state.profile_analysis is not None:
             search_criteria = dict(display_search_criteria())

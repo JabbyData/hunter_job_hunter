@@ -1,9 +1,7 @@
 streamlit
 pymupdf
 langchain_core
-langchain-huggingface
 langchain-ollama
-transformers
 torch
 python-jobspy
 pandas

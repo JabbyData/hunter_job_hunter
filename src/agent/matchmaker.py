@@ -104,25 +104,6 @@ def match_job_profile(
 
 
 def filter_jobs(user_profile: dict, search_criteria: dict, jobs: pd.DataFrame) -> float:
-    """
-    Brief description of what the function does.
-
-    Args:
-        arg_1 (str): Description of the first parameter.
-        arg_2 (np.array): Description of the second parameter.
-        arg_n (int)(optional): Description of the third parameter.
-
-    Returns:
-        float: Description of the return value.
-
-    Raises:
-        ExceptionType: Description of the exception that might be raised.
-
-    Example:
-    >>> filter_jobs(arg_1, arg_2, arg_n)
-    expected_output
-    """
-
     try:
         subprocess.Popen(
             ["ollama", "serve"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
@@ -153,7 +134,7 @@ def filter_jobs(user_profile: dict, search_criteria: dict, jobs: pd.DataFrame) -
         )
         if match_output[0].lower() == "true":
             idx_job.append(i)
-            agent_message.append(match_output[1])
+            agent_message.append(", ".join(match_output[1:]).replace(")", ""))
 
     progress_bar.empty()
     status_text.empty()
