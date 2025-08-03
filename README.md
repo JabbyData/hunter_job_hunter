@@ -38,7 +38,7 @@ pip install -r requirements.txt
 To execute the code you just need to run the following command:
 
 ```bash
-streamlit run main.py
+streamlit run src/main.py
 ```
 
 It will then create a **streamlit** local host to interact with. If you want to upload a new PDF file, simply refresh the page.
